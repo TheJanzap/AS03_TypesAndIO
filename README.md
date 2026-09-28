@@ -23,9 +23,12 @@ Given the following two data types:
 `data RGB = R | G | B`     -- has exactly 3 possible values.
 
 **Todos:**
-- How many different values exist of type `(Bool, RGB)`? Write them down.
-- How many different values exist of type `Either Bool RGB`? Write them down.
-- How many different values exist of type `RGB -> Bool`? Write them down.
+- How many different values exist of type `(Bool, RGB)`? Write them down.\
+  _Bool has 2, RGB 3 values. Since a tuple is a product type, it has 2 * 3 = 6 different values._
+- How many different values exist of type `Either Bool RGB`? Write them down.\
+  _Again 2 and 3 values respectively. But Either is a sum type, so 2 + 3 = 5 different values._
+- How many different values exist of type `RGB -> Bool`? Write them down.\
+  _The arrow operator is an exponential type, so 2^3 = 8 different values._
 
 Two types `A` and `B` are isomorphic if two functions can be provided:\
 `aTob :: A -> B` and `bToA :: B -> A` such that\
@@ -57,8 +60,32 @@ bToa1 B = Right True
 ✅ (by inspection 🧐, later we will see how to prove it.)
 
 **Todos:**
-- Show that `(Bool,a)` is isomorphic to `Either a a`.
-- Show that `(a -> b -> c)` is isomorphic to `(a, b) -> c`. This is un- currying.
+- Show that `(Bool,a)` is isomorphic to `Either a a`.\
+  a) |`(Bool, a)`| = |`Either a a`|\
+          $2 * a    =   a + a$\
+  b)
+  ```hs
+  tToE :: (Bool, a) -> Either a a
+  tToE (True, a)  = Left a
+  tToE (False, a) = Right a
+  ```
+  ```hs
+  eToT :: Either a a -> (Bool, a)
+  eToT (Left a)  = (True, a)
+  eToT (Right a) = (False, a)
+  ``` 
+- Show that `(a -> b -> c)` is isomorphic to `(a, b) -> c`. This is un- currying.\
+  a) |`(a -> b -> c)`| = |`(a, b) -> c`|\
+           $c^{b^a}       =    c^{a * b}$\
+  b)
+  ```hs
+  uncurry' :: (a -> b -> c) -> (a, b) -> c
+  uncurry' f (a, b) = f a b  
+  ```
+  ```hs
+  curry' :: (a, b) -> c -> (a -> b -> c)
+  curry' f a b = f (a, b)
+  ```
 
 **Note:**\
 Note that this topic can be explored further: One can use [taylor approximation to think about recursive structures](https://web.archive.org/web/20140222144454/http://chris-taylor.github.io/blog/2013/02/11/the-algebra-of-algebraic-data-types-part-ii) and even [derivatives of data types](http://strictlypositive.org/diff.pdf) have a useful interpretation. So be aware: This is a rabbit hole!
