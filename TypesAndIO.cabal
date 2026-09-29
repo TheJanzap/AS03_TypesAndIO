@@ -15,3 +15,17 @@ executable wttr
         http-client,
         bytestring,
         text
+
+executable hcp
+    main-is: hcp1.hs
+    default-language: Haskell2010
+    ghc-options: -Wall
+    build-depends:
+        base >=4.17 && <5,
+
+executable hcp2
+    main-is: hcp2.hs
+    default-language: Haskell2010
+    ghc-options: -Wall
+    build-depends:
+        base >=4.17 && <5,
