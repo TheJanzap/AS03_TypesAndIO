@@ -177,7 +177,28 @@ data Expr
 - Implement the function `eval :: Expr -> Int` only by parameterizing `foldExpr`.
 - Implement the function `toString :: Expr -> String` only by parameterizing `foldExpr`.
 
-Hint: For every value constructor of a type there is a parameter in the corresponding `fold`. 
+Hint: For every value constructor of a type there is a parameter in the corresponding `fold`.
+
+```hs
+-- foldExpr needs to take a function for each variant Expr offers:
+-- Value, Addition, Multiplication
+foldExpr :: (Int -> a) -> (a -> a -> a) -> (a -> a -> a) -> (a -> a -> a) -> Expr -> a
+foldExpr fVal _    _    (Val n)   = f n
+foldExpr fVal fAdd fMul (Add x y) = fAdd (foldExpr fVal fAdd fMul x) (foldExpr fVal fAdd fMul y)
+foldExpr fVal fAdd fMul (Mul x y) = fMul (foldExpr fVal fAdd fMul x) (foldExpr fVal fAdd  fMul y)
+
+eval :: Expr -> Int
+eval e = foldExpr () (+) (*)
+
+toString :: Expr -> String
+toString e = foldExpr
+              -- Prints the current int
+              show
+              -- Prints the addition
+              (\x y -> "(" ++ toString x ++ " + " toString y ++ ")")
+              -- Prints the multiplication
+              (\x y -> "(" ++ toString x ++ " * " toString y ++ ")")
+```
 
 ## Part 4. hcp
 **Todos:** 
