@@ -14,7 +14,8 @@ executable wttr
         http-client-tls,
         http-client,
         bytestring,
-        text
+        text,
+        time
 
 executable hcp
     main-is: hcp1.hs
