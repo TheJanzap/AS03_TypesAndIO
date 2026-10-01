@@ -183,21 +183,23 @@ Hint: For every value constructor of a type there is a parameter in the correspo
 -- foldExpr needs to take a function for each variant Expr offers:
 -- Value, Addition, Multiplication
 foldExpr :: (Int -> a) -> (a -> a -> a) -> (a -> a -> a) -> (a -> a -> a) -> Expr -> a
-foldExpr fVal _    _    (Val n)   = f n
+foldExpr fVal _    _    (Val n)   = fVal n
 foldExpr fVal fAdd fMul (Add x y) = fAdd (foldExpr fVal fAdd fMul x) (foldExpr fVal fAdd fMul y)
-foldExpr fVal fAdd fMul (Mul x y) = fMul (foldExpr fVal fAdd fMul x) (foldExpr fVal fAdd  fMul y)
+foldExpr fVal fAdd fMul (Mul x y) = fMul (foldExpr fVal fAdd fMul x) (foldExpr fVal fAdd fMul y)
 
 eval :: Expr -> Int
-eval e = foldExpr () (+) (*)
+-- id simply returns the Int
+eval expr = foldExpr id (+) (*) expr
 
 toString :: Expr -> String
-toString e = foldExpr
-              -- Prints the current int
-              show
-              -- Prints the addition
-              (\x y -> "(" ++ toString x ++ " + " toString y ++ ")")
-              -- Prints the multiplication
-              (\x y -> "(" ++ toString x ++ " * " toString y ++ ")")
+toString expr = foldExpr
+                -- Prints the current int
+                show
+                -- Prints the addition
+                (\x y -> "(" ++ toString x ++ " + " toString y ++ ")")
+                -- Prints the multiplication
+                (\x y -> "(" ++ toString x ++ " * " toString y ++ ")")
+                expr
 ```
 
 ## Part 4. hcp
