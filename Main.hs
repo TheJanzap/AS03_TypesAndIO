@@ -7,7 +7,7 @@ import Network.HTTP.Client.TLS ( tlsManagerSettings )
 import System.Environment ( getArgs )
 import System.Exit ( exitSuccess )
 import Data.Time.Clock (getCurrentTime)
-import Data.Time (formatTime, defaultTimeLocale)
+import Data.Time (formatTime, defaultTimeLocale, utcToLocalZonedTime)
 
 main :: IO ()
 main = do
@@ -62,7 +62,12 @@ fetchWeather city = do
 
 writeToFile :: L8.ByteString -> String -> IO ()
 writeToFile content city = do
-  currentTime <- getCurrentTime
-  let timestamp = formatTime defaultTimeLocale "%Y-%m-%d_%H:%M:%S" currentTime
+  timestamp <- getTimestamp
   let fileName = city ++ "_" ++ timestamp ++ ".txt"
   L8.writeFile fileName content
+
+getTimestamp :: IO String
+getTimestamp = do
+    currentTime <- getCurrentTime
+    zonedTime <- utcToLocalZonedTime currentTime
+    pure $ formatTime defaultTimeLocale "%Y-%m-%d_%H:%M:%S" zonedTime
