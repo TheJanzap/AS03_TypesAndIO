@@ -7,6 +7,8 @@ import Network.HTTP.Client.TLS ( tlsManagerSettings )
 import System.Environment ( getArgs )
 import Control.Monad ( when )
 import System.Exit ( exitSuccess )
+import Data.Time.Clock (getCurrentTime)
+import Data.Time (formatTime, defaultTimeLocale)
 
 main :: IO ()
 main = do
@@ -16,6 +18,7 @@ main = do
     exitSuccess
   weather <- fetchWeather arg
   L8.putStrLn weather
+  writeToFile weather arg
 
 printHelp :: IO ()
 printHelp = do
@@ -36,3 +39,10 @@ fetchWeather city = do
     request <- parseRequest url
     response <- httpLbs request manager
     pure (responseBody response)
+
+writeToFile :: L8.ByteString -> String -> IO ()
+writeToFile content city = do
+  currentTime <- getCurrentTime
+  let timestamp = formatTime defaultTimeLocale "%Y-%m-%d_%H:%M:%S" currentTime
+  let fileName = city ++ "_" ++ timestamp ++ ".txt"
+  L8.writeFile fileName content
