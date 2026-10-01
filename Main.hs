@@ -2,10 +2,11 @@ module Main where
 
 import qualified Data.ByteString.Lazy.Char8 as L8
 import Network.HTTP.Client
-import Network.HTTP.Client.TLS
-import System.Environment
-import Control.Monad
-import System.Exit
+    ( httpLbs, newManager, parseRequest, Response(responseBody) )
+import Network.HTTP.Client.TLS ( tlsManagerSettings )
+import System.Environment ( getArgs )
+import Control.Monad ( when )
+import System.Exit ( exitSuccess )
 
 main :: IO ()
 main = do
@@ -13,7 +14,8 @@ main = do
   when (arg == "--help") $ do
     printHelp
     exitSuccess
-  putStrLn "Test"
+  weather <- fetchWeather arg
+  L8.putStrLn weather
 
 printHelp :: IO ()
 printHelp = do
@@ -26,3 +28,11 @@ firstArg = do
   args <- getArgs
   let first = args !! 0
   pure first -- Place String in IO and return
+
+fetchWeather :: String -> IO L8.ByteString
+fetchWeather city = do
+    manager <- newManager tlsManagerSettings
+    let url = "https://wttr.in/~" ++ city ++ "?format=3"
+    request <- parseRequest url
+    response <- httpLbs request manager
+    pure (responseBody response)
