@@ -5,7 +5,8 @@ import System.Environment (getArgs)
 main :: IO ()
 main = 
     getArgs >>= \args ->
-        let inp  = args !! 0
-            outp = args !! 1
-        in readFile inp >>= \content ->
-            writeFile outp content
+        case args of
+            [source, target] -> 
+                readFile source >>= \content ->
+                writeFile target content
+            _ -> putStrLn "Usage: hcp <source> <destination>"

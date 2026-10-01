@@ -4,8 +4,9 @@ import System.Environment (getArgs)
 
 main :: IO ()
 main = do
-        args <- getArgs
-        let inp = args !! 0
-        let outp = args !! 1
-        content <- readFile inp
-        writeFile outp content
+    args <- getArgs
+    case args of
+        [source, target] -> do
+            content <- readFile source
+            writeFile target content
+        _ -> putStrLn "Usage: hcp <source> <destination>"
