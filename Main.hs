@@ -5,37 +5,57 @@ import Network.HTTP.Client
     ( httpLbs, newManager, parseRequest, Response(responseBody) )
 import Network.HTTP.Client.TLS ( tlsManagerSettings )
 import System.Environment ( getArgs )
-import Control.Monad ( when )
 import System.Exit ( exitSuccess )
 import Data.Time.Clock (getCurrentTime)
 import Data.Time (formatTime, defaultTimeLocale)
 
 main :: IO ()
 main = do
-  arg <- firstArg
-  when (arg == "--help") $ do
-    printHelp
-    exitSuccess
-  weather <- fetchWeather arg
-  L8.putStrLn weather
-  writeToFile weather arg
+  action <- parseArgs
+  case action of
+    Help -> printHelp
+    LoadWeather city -> getWeather city
+
+data Action =
+    Help
+  | LoadWeather String
+
+newtype URL = URL String
+
+parseArgs :: IO Action
+parseArgs = do
+  args <- getArgs
+  let action =
+        case args of
+          -- Why doesn't Haskell have multiple cases per match arm?
+          []          -> Help
+          ["-h"]      -> Help
+          ["--help"]  -> Help
+          [city]      -> LoadWeather city
+          _           -> Help
+  -- What it feels like to write Haskell:
+  pure action
 
 printHelp :: IO ()
 printHelp = do
   putStrLn "wttr - Get the current weather for a city"
   putStrLn "usage: wttr <CITY>"
   putStrLn "--help    Prints this help message"
+  exitSuccess
 
-firstArg :: IO String
-firstArg = do
-  args <- getArgs
-  let first = args !! 0
-  pure first -- Place String in IO and return
+getWeather :: String -> IO ()
+getWeather city = do
+  weather <- fetchWeather city
+  L8.putStrLn weather
+  writeToFile weather city
+
+buildURL :: String -> URL
+buildURL city = URL $ "https://wttr.in/~" ++ city ++ "?format=3"
 
 fetchWeather :: String -> IO L8.ByteString
 fetchWeather city = do
     manager <- newManager tlsManagerSettings
-    let url = "https://wttr.in/~" ++ city ++ "?format=3"
+    let (URL url) = buildURL city
     request <- parseRequest url
     response <- httpLbs request manager
     pure (responseBody response)
